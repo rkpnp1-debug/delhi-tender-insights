@@ -31,6 +31,7 @@ export function TenderCard({ tender, onView, isFavourite, onToggleFavourite }: P
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-1.5">
+              <Badge variant="outline" className="text-[10px]">{tender.stateName || tender.stateCode}</Badge>
               {tender.isNew && <Badge variant="success">New</Badge>}
               {tender.isClosingSoon && (
                 <Badge variant={urgent ? "danger" : "warning"}>
