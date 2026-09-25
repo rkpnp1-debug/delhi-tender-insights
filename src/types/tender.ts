@@ -1,13 +1,38 @@
-export type TenderStatus = "active" | "closing_soon" | "extended" | "corrigendum" | "closed" | "awarded";
+export type TenderStatus =
+  | "active"
+  | "closing_soon"
+  | "extended"
+  | "corrigendum"
+  | "closed"
+  | "awarded";
 
 export type TenderCategory =
-  | "Civil Works" | "Electrical" | "Water & Sewerage" | "Roads" | "Buildings"
-  | "Consultancy" | "Goods" | "Services" | "IT & Electronics" | "Mechanical"
-  | "Horticulture" | "Others";
+  | "Civil Works"
+  | "Electrical"
+  | "Water & Sewerage"
+  | "Roads"
+  | "Buildings"
+  | "Consultancy"
+  | "Goods"
+  | "Services"
+  | "IT & Electronics"
+  | "Mechanical"
+  | "Horticulture"
+  | "Others";
 
 export type DelhiZone =
-  | "North" | "South" | "East" | "West" | "Central" | "New Delhi"
-  | "North-East" | "North-West" | "South-East" | "South-West" | "Shahdara" | "Unknown";
+  | "North"
+  | "South"
+  | "East"
+  | "West"
+  | "Central"
+  | "New Delhi"
+  | "North-East"
+  | "North-West"
+  | "South-East"
+  | "South-West"
+  | "Shahdara"
+  | "Unknown";
 
 export interface Tender {
   id: string;
@@ -40,6 +65,15 @@ export interface Tender {
   description?: string;
   isNew: boolean;
   isClosingSoon: boolean;
+  stateCode: string;
+  stateName: string;
+  paymentMode?: string;
+  noOfCovers?: string;
+  emdPayableTo?: string;
+  withdrawalAllowed?: string;
+  subCategory?: string;
+  detailPath?: string;
+  enriched?: boolean;
 }
 
 export interface TenderFilters {
@@ -47,6 +81,7 @@ export interface TenderFilters {
   departments?: string[];
   zones?: DelhiZone[];
   categories?: TenderCategory[];
+  states?: string[];
   valueMin?: number;
   valueMax?: number;
   closingFrom?: string;
@@ -67,6 +102,7 @@ export interface AnalyticsSummary {
   byZone: { name: string; count: number; value: number }[];
   byCategory: { name: string; count: number; value: number }[];
   byValueRange: { range: string; count: number; value: number }[];
+  byState?: { name: string; count: number; value: number }[];
   lastUpdated: string;
   dataSource: "live" | "cached" | "sample";
 }
@@ -77,4 +113,5 @@ export interface TenderResponse {
   lastUpdated: string;
   source: "live" | "cached" | "sample";
   total: number;
+  portalsScraped?: string[];
 }
