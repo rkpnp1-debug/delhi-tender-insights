@@ -100,7 +100,10 @@ export default function HomePage() {
     }
   }, [filtered, tab, favourites]);
 
-  const sorted = useMemo(() => sortTenders(tabbed, sortKey), [tabbed, sortKey]);
+  const sorted = useMemo(
+    () => sortTenders(tabbed, sortKey, filters.search),
+    [tabbed, sortKey, filters.search]
+  );
 
   const analytics = useMemo(() => {
     if (!filtered.length && data?.analytics) return data.analytics;
@@ -120,6 +123,15 @@ export default function HomePage() {
           return d >= 0 && d <= 7;
         }),
         "closing"
+      ).slice(0, 8),
+    [filtered]
+  );
+
+  const highValue = useMemo(
+    () =>
+      sortTenders(
+        filtered.filter((t) => (t.estimatedValue ?? 0) >= 50_00_000),
+        "value_desc"
       ).slice(0, 8),
     [filtered]
   );
@@ -157,7 +169,12 @@ export default function HomePage() {
   const applyKeyword = (kw: string) => {
     setFilters((f) => ({ ...f, search: kw }));
     setTab("all");
+    setSortKey("relevance");
   };
+
+  useEffect(() => {
+    if (filters.search?.trim()) setSortKey("relevance");
+  }, [filters.search]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -168,12 +185,13 @@ export default function HomePage() {
           <div className="absolute top-0 right-0 w-72 h-72 bg-saffron/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl" />
           <div className="relative z-10 max-w-2xl">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Find tenders worth bidding —{" "}
-              <span className="text-saffron">fast</span>
+              Discover. Score. Decide —{" "}
+              <span className="text-saffron">faster</span>
             </h1>
             <p className="mt-2 text-navy-100 text-sm sm:text-base leading-relaxed">
-              Live public tenders from Delhi and major state portals. Filter, prioritise,
-              shortlist and export in one place.
+              Live multi-state GePNIC tenders with opportunity scores, deadline
+              risk flags, and one-click shortlist — inspired by Tender247,
+              BidAssist and Tenderkart, free to explore.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-navy-200">
               <Badge variant="secondary" className="bg-white/10 text-white border-0">
@@ -181,6 +199,15 @@ export default function HomePage() {
               </Badge>
               <span>·</span>
               <span className="capitalize">Data: {data?.source || "…"}</span>
+              {(data as { portalsScraped?: string[] })?.portalsScraped?.length ? (
+                <>
+                  <span>·</span>
+                  <span>
+                    Portals:{" "}
+                    {(data as { portalsScraped: string[] }).portalsScraped.join(", ")}
+                  </span>
+                </>
+              ) : null}
             </div>
           </div>
         </section>
@@ -269,6 +296,7 @@ export default function HomePage() {
               >
                 <option value="closing">Closing soon</option>
                 <option value="score">Best match</option>
+                <option value="relevance">Relevance</option>
                 <option value="value_desc">Highest value</option>
                 <option value="value_asc">Lowest value</option>
                 <option value="newest">Newest</option>
