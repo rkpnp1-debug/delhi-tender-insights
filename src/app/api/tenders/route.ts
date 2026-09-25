@@ -5,6 +5,7 @@ import type { TenderFilters, DelhiZone, TenderCategory, TenderStatus } from "@/t
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,6 +22,8 @@ export async function GET(req: NextRequest) {
     if (zones) filters.zones = zones.split(",").filter(Boolean) as DelhiZone[];
     const cats = searchParams.get("categories");
     if (cats) filters.categories = cats.split(",").filter(Boolean) as TenderCategory[];
+    const states = searchParams.get("states");
+    if (states) filters.states = states.split(",").filter(Boolean);
     const status = searchParams.get("status");
     if (status) filters.status = status.split(",").filter(Boolean) as TenderStatus[];
     if (searchParams.get("corrigendum") === "1") filters.hasCorrigendum = true;
@@ -32,6 +35,18 @@ export async function GET(req: NextRequest) {
     const filtered = filterTenders(data.tenders, filters);
     const analytics = computeAnalytics(filtered, data.source);
 
+    const byStateMap = new Map<string, { count: number; value: number }>();
+    for (const t of filtered) {
+      const prev = byStateMap.get(t.stateName) || { count: 0, value: 0 };
+      byStateMap.set(t.stateName, {
+        count: prev.count + 1,
+        value: prev.value + (t.estimatedValue || 0),
+      });
+    }
+    analytics.byState = Array.from(byStateMap.entries())
+      .map(([name, v]) => ({ name, ...v }))
+      .sort((a, b) => b.count - a.count);
+
     return NextResponse.json({
       tenders: filtered,
       analytics,
@@ -39,9 +54,13 @@ export async function GET(req: NextRequest) {
       source: data.source,
       total: filtered.length,
       unfilteredTotal: data.total,
+      portalsScraped: data.portalsScraped || [],
     });
   } catch (err) {
     console.error("API error:", err);
-    return NextResponse.json({ error: "Failed to fetch tenders", message: String(err) }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch tenders", message: String(err) },
+      { status: 500 }
+    );
   }
 }
