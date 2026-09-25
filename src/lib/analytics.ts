@@ -80,6 +80,7 @@ export function filterTenders(tenders: Tender[], filters: TenderFilters): Tender
     if (filters.departments?.length && !filters.departments.includes(t.organisation)) return false;
     if (filters.zones?.length && !filters.zones.includes(t.zone)) return false;
     if (filters.categories?.length && !filters.categories.includes(t.category)) return false;
+    if (filters.states?.length && !filters.states.includes(t.stateCode)) return false;
     if (filters.valueMin != null && (t.estimatedValue ?? 0) < filters.valueMin) return false;
     if (filters.valueMax != null && (t.estimatedValue ?? Infinity) > filters.valueMax) return false;
     if (filters.closingFrom && new Date(t.closingDate) < new Date(filters.closingFrom)) return false;
