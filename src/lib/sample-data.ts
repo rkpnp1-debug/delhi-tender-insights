@@ -126,6 +126,9 @@ export function generateSampleTenders(count = 120): Tender[] {
       description: template.title,
       isNew,
       isClosingSoon: closingSoon,
+      stateCode: "DL",
+      stateName: "Delhi (NCT)",
+      enriched: false,
     });
   }
 
